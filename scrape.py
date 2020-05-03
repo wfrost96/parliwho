@@ -21,8 +21,7 @@ for i in range(1, 34):
         del link_member_letters[-7:]
         link_member_full = "".join(link_member_letters) + "career"
         list_of_links.append(link_member_full)
-#print(list_of_links)
-#list_of_links.append("https://members.parliament.uk/member/4841/career")
+#print(list_of_links)"""
 
 mps_list = []
 
@@ -163,21 +162,42 @@ for mp_link in list_of_links:
 
 
     if "Opposition post" in post_list:
-        #print("Has or has had Opposition post")
+        print("Has or has had Opposition post")
 
-        opposition_post_tag = soup.select("div[class=card-list] > div[class=card]> div[class=card-inner] >  div[class=content] > div[class=primary-info]")
-        for item in opposition_post_tag:
-            for i in item:
-                opposition_post = i.strip()
-                #print(opposition_post)
-                mp.append(opposition_post)
+        #get the opposition post
+        #sometimes class=card is a div and sometimes it is an a, so account for both scenarios to get the data we want
+        opposition_post_tag = soup.select("div[class=card-list] > div[class=card] > div[class=card-inner] >  div[class=content] > div[class=primary-info]")
+        if opposition_post_tag:
+            for item in opposition_post_tag:
+                for i in item:
+                    opposition_post = i.strip()
+                    mp.append(opposition_post)
+        else:
+            #print("list is empty")
+            opposition_post_tag = soup.select("div[class=card-list] > a[class=card] > div[class=card-inner] >  div[class=content] > div[class=primary-info]")
+            for item in opposition_post_tag:
+                for i in item:
+                    if i.strip() != constituency:
+                        opposition_post = i.strip()
+                        mp.append(opposition_post)
 
+        #get the opposition post department
+        #sometimes class=card is a div and sometimes it is an a, so account for both scenarios to get the data we want
         opposition_post_dep_tag = soup.select("div[class=card-list] > div[class=card] > div[class=card-inner] >  div[class=content] > div[class=secondary-info]")
-        for item in opposition_post_dep_tag:
-            for i in item:
-                opposition_post_dep = i.strip()
-                #print(opposition_post_dep)
-                mp.append(opposition_post_dep)
+        if opposition_post_dep_tag:
+            for item in opposition_post_dep_tag:
+                for i in item:
+                    opposition_post_dep = i.strip()
+                    print(opposition_post_dep)
+                    mp.append(opposition_post_dep)
+        else:
+            print("list is empty")
+            opposition_post_dep_tag = soup.select("div[class=card-list] > a[class=card] > div[class=card-inner] >  div[class=content] > div[class=secondary-info]")
+            for item in opposition_post_dep_tag:
+                for i in item:
+                    if "Elected" not in i.strip():
+                        opposition_post = i.strip()
+                        mp.append(opposition_post)
     else:
         mp.append("no")
         mp.append("no")
@@ -216,9 +236,7 @@ for mp_link in list_of_links:
             mp.append("no")
     else:
         mp.append("no")
-
-    #print("")
-    #print(mp)
+        
     mps_list.append(mp)
 
 print(mps_list)
