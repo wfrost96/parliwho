@@ -12,4 +12,5 @@ The results of the programme as executed on 3rd May 2020 is available in all_mps
 <h2>For Peers</h2>
 peers_list.py and peers_interests.php both accurate as of 8th May 2020. Running scrape.py will update both.
 
-Feel free to use anythin ghere, but all credit to williamfro.st please.
+<h3>Licence</h3>
+Feel free to use anything here, but all credit to williamfro.st please.
