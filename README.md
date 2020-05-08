@@ -1,6 +1,6 @@
 # parliwho_public
 
-My public repository for all data I collect on UK Parliament.
+Multiple programmes for making use of publically available data around UK Parliament, Peers, and MPs.
 
 <h2>For MPs</h2>
 Programme for scraping data on all UK MPs from parliament.uk. Data includes name, constituency, party, intake year, Gov post, opposition post, and Select Committees.
