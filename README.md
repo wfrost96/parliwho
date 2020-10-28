@@ -1,4 +1,4 @@
-# parliwho_public
+# parliwho
 
 Multiple programmes for making use of publically available data around UK Parliament, Peers, and MPs.
 
