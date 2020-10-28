@@ -6,7 +6,8 @@ import re
 link_base = "https://members.parliament.uk/members/Commons?page="
 
 list_of_links = []
-for i in range(1, 34):
+#for i in range(1, 34):
+for i in range(10, 34):
     link = link_base + str(i)
     webpage = requests.get(link)
     soup = BeautifulSoup(webpage.content, "html.parser")
@@ -21,7 +22,8 @@ for i in range(1, 34):
         del link_member_letters[-7:]
         link_member_full = "".join(link_member_letters) + "career"
         list_of_links.append(link_member_full)
-#print(list_of_links)
+#print(list_of_links)"""
+#list_of_links.append("https://members.parliament.uk/member/4856/career")
 
 mps_list = []
 
@@ -315,3 +317,42 @@ for mp_link in list_of_links:
     mps_list.append(mp)
 
 #print(mps_list)
+
+"""for mp in mps_list:
+    for i in mp:
+        print(i)"""
+
+from config import *
+
+mycursor = conn.cursor()
+
+for mp in mps_list:
+    name = mp[0]
+    picture = mp[1]
+    gender = mp[2]
+    constituency = mp[3]
+    party = mp[4]
+    intake = mp[5]
+    post = mp[6]
+    frontbench = mp[7]
+    payroll = mp[8]
+    cabinet = mp[9]
+    dep = mp[10]
+    select_committees = mp[11]
+
+    #check if already in table. if it is, update all the values; if not, add.
+    mycursor.execute("SELECT * FROM all_mps WHERE name = '%s'" % name)
+    myresult = mycursor.fetchall()
+
+    if len(myresult) == 1: #already in table so update
+        sql = "UPDATE all_mps SET post = %s, frontbench = %s, payroll = %s, cabinet = %s, dep = %s, select_committees = %s WHERE name = %s"
+        val = (post, frontbench, payroll, cabinet, dep, select_committees, name)
+        mycursor.execute(sql, val)
+    elif len(myresult) == 0: #not in table, so add
+        mycursor.execute ("INSERT INTO all_mps (name, picture, gender, constituency, party, intake, post, frontbench, payroll, cabinet, dep, select_committees) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (name, picture, gender, constituency, party, intake, post, frontbench, payroll, cabinet, dep, select_committees))
+    else:
+        print("Error adding to table.")
+
+conn.commit()
+
+conn.close()
