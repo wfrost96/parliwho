@@ -7,7 +7,7 @@ Program for scraping data on all UK MPs from parliament.uk. Data includes name, 
 <br><br>
 This data was used to create the database for parliwho.com.
 <br><br>
-The results of the program as executed on 25th September 2020 are available in all_mps.py. Running scrape.py will of course update it.
+The results of the program as executed on 25th September 2020 are available in all_mps.py. Running get_mp.py will of course update it.
 
 <h2>For Peers</h2>
 peers_list.py and peers_interests.php both accurate as of 8th May 2020. Running scrape.py will update both.
