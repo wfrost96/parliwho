@@ -7,7 +7,7 @@ link_base = "https://members.parliament.uk/members/Commons?page="
 
 list_of_links = []
 #for i in range(1, 34):
-for i in range(10, 34):
+for i in range(6, 34):
     link = link_base + str(i)
     webpage = requests.get(link)
     soup = BeautifulSoup(webpage.content, "html.parser")
@@ -23,7 +23,7 @@ for i in range(10, 34):
         link_member_full = "".join(link_member_letters) + "career"
         list_of_links.append(link_member_full)
 #print(list_of_links)"""
-#list_of_links.append("https://members.parliament.uk/member/4856/career")
+#list_of_links.append("https://members.parliament.uk/member/4639/career")
 
 mps_list = []
 
@@ -55,6 +55,32 @@ def get_name(soup):
     #return list as string
     name = "".join(name_letters)
     return(name)
+
+
+def get_email(mp_link):
+    email_link = mp_link[:-6] + "contact"
+    email = email_link
+
+    contact_webpage = requests.get(email_link)
+    contact_soup = BeautifulSoup(contact_webpage.content, "html.parser")
+
+    email_tag = contact_soup.select("div[class=col-md-7] > div[class=contact-line] > a")
+
+    mylist = []
+    for item in email_tag:
+        mylist.append(item.get_text().strip())
+    try:
+        try:
+            phone = mylist[0]
+            email = mylist[1]
+        except:
+            phone = "no"
+            email = mylist[0]
+    except:
+        phone = "no"
+        email = "no"
+
+    return email
 
 def get_picture_link(name):
     link_beginning = "<img src=\"all_mps/"
@@ -257,64 +283,70 @@ def get_select_committees(soup):
 
 for mp_link in list_of_links:
     #print(mp_link)
-    webpage = requests.get(mp_link)
-    soup = BeautifulSoup(webpage.content, "html.parser")
+    try:
+        webpage = requests.get(mp_link)
+        soup = BeautifulSoup(webpage.content, "html.parser")
 
-    mp = []
+        mp = []
 
-    #get name
-    name_letters = []
-    name = get_name(soup)
-    mp.append(name)
+        #get name
+        name_letters = []
+        name = get_name(soup)
+        mp.append(name)
 
-    #get picture link
-    picture_link = get_picture_link(name)
-    mp.append(picture_link)
+        email = get_email(mp_link)
+        mp.append(email)
 
-    #get gender
-    gender = get_mp_gender(name)
-    mp.append(gender)
+        #get picture link
+        picture_link = get_picture_link(name)
+        mp.append(picture_link)
 
-    #get constituency
-    constituency = get_constituency(soup)
-    mp.append(constituency)
+        #get gender
+        gender = get_mp_gender(name)
+        mp.append(gender)
 
-    #get party
-    party = get_party(soup)
-    mp.append(party)
+        #get constituency
+        constituency = get_constituency(soup)
+        mp.append(constituency)
 
-    #get intake year
-    intake = get_intake(soup)
-    mp.append(intake)
+        #get party
+        party = get_party(soup)
+        mp.append(party)
 
-    #get gov/opposition posts
-    post_list = get_post_list(soup)
+        #get intake year
+        intake = get_intake(soup)
+        mp.append(intake)
 
-    post = get_post(soup)
-    mp.append(post)
+        #get gov/opposition posts
+        post_list = get_post_list(soup)
 
-    frontbench = get_frontbench(post)
-    mp.append(frontbench)
+        post = get_post(soup)
+        mp.append(post)
 
-    payroll = get_payroll(post)
-    mp.append(payroll)
+        frontbench = get_frontbench(post)
+        mp.append(frontbench)
 
-    cabinet = get_cabinet(name)
-    mp.append(cabinet)
+        payroll = get_payroll(post)
+        mp.append(payroll)
 
-    #get gov/opposition posts dep
-    post = get_post_dep(soup)
-    mp.append(post)
+        cabinet = get_cabinet(name)
+        mp.append(cabinet)
 
-    #get select committees
-    select_committees = get_select_committees(soup)
-    if select_committees is None: #this covers cases where an MP used to sit on a select committee but no longer does. can this be got into the function?
-        mp.append("no")
-    else:
-        mp.append(select_committees)
+        #get gov/opposition posts dep
+        post = get_post_dep(soup)
+        mp.append(post)
 
-    #add the mp to the big list
-    mps_list.append(mp)
+        #get select committees
+        select_committees = get_select_committees(soup)
+        if select_committees is None: #this covers cases where an MP used to sit on a select committee but no longer does. can this be got into the function?
+            mp.append("no")
+        else:
+            mp.append(select_committees)
+
+        #add the mp to the big list
+        mps_list.append(mp)
+    except:
+        print("Error with", mp_link)
 
 #print(mps_list)
 
@@ -327,32 +359,47 @@ from config import *
 mycursor = conn.cursor()
 
 for mp in mps_list:
-    name = mp[0]
-    picture = mp[1]
-    gender = mp[2]
-    constituency = mp[3]
-    party = mp[4]
-    intake = mp[5]
-    post = mp[6]
-    frontbench = mp[7]
-    payroll = mp[8]
-    cabinet = mp[9]
-    dep = mp[10]
-    select_committees = mp[11]
+    try:
+        name = mp[0]
+        email = mp[1]
+        picture = mp[2]
+        gender = mp[3]
+        constituency = mp[4]
+        party = mp[5]
+        intake = mp[6]
+        post = mp[7]
+        frontbench = mp[8]
+        payroll = mp[9]
+        cabinet = mp[10]
+        dep = mp[11]
+        select_committees = mp[12]
 
-    #check if already in table. if it is, update all the values; if not, add.
-    mycursor.execute("SELECT * FROM all_mps WHERE name = '%s'" % name)
-    myresult = mycursor.fetchall()
+        #check if already in table. if it is, update all the values; if not, add.
+        mycursor.execute("SELECT * FROM all_mps WHERE name = '%s'" % name)
+        myresult = mycursor.fetchall()
 
-    if len(myresult) == 1: #already in table so update
-        sql = "UPDATE all_mps SET post = %s, frontbench = %s, payroll = %s, cabinet = %s, dep = %s, select_committees = %s WHERE name = %s"
-        val = (post, frontbench, payroll, cabinet, dep, select_committees, name)
-        mycursor.execute(sql, val)
-    elif len(myresult) == 0: #not in table, so add
-        mycursor.execute ("INSERT INTO all_mps (name, picture, gender, constituency, party, intake, post, frontbench, payroll, cabinet, dep, select_committees) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (name, picture, gender, constituency, party, intake, post, frontbench, payroll, cabinet, dep, select_committees))
-    else:
-        print("Error adding to table.")
+        if len(myresult) == 1: #already in table so update
+            sql = "UPDATE all_mps SET email = %s, post = %s, frontbench = %s, payroll = %s, cabinet = %s, dep = %s, select_committees = %s WHERE name = %s"
+            val = (email, post, frontbench, payroll, cabinet, dep, select_committees, name)
+            mycursor.execute(sql, val)
+            conn.commit()
+        elif len(myresult) == 0: #not in table, so add
+            mycursor.execute ("INSERT INTO all_mps (name, email, picture, gender, constituency, party, intake, post, frontbench, payroll, cabinet, dep, select_committees) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (name, email, picture, gender, constituency, party, intake, post, frontbench, payroll, cabinet, dep, select_committees))
+            conn.commit()
+        else:
+            print("Error adding", name, "to table.")
 
-conn.commit()
+    except:
+        print("Error adding", name, "to table.")
 
 conn.close()
+
+"""
+Error with https://members.parliament.uk/member/4598/career
+Error with https://members.parliament.uk/member/4825/career
+Error with https://members.parliament.uk/member/4113/career
+Error with https://members.parliament.uk/member/4382/career
+Error adding Neil O'Brien to table.
+Error adding Brendan O'Hara to table.
+
+"""
